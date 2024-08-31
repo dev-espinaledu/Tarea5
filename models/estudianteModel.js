@@ -15,7 +15,7 @@ function agregarEstudiante(nuevoEstudiante, callback) {
         if (err) {
             console.log("No se pudo hacer la consulta");
         } else {
-            db.query("SELECT * FROM estudiantes where id=?",[results.insertId], (err, results) => {
+            db.query("SELECT * FROM estudiantes WHERE id=?",[results.insertId], (err, results) => {
                 if (err) {
                     console.log("No se pudo actualizar el estudiante");
                 } else {
