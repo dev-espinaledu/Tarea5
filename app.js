@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 3300
 const {traerEstudiantes, agregarEstudiante, actualizarEstudiante, eliminarEstudiante} = require('./models/estudianteModel.js');
-const {mostrarMatriculas, añadirMatricula, actualizarMatricula, eliminarMatricula, contarMatriculas} = require('./models/matriculaModel.js');
+const {mostrarMatriculas, añadirMatricula, verificarMatricula, actualizarMatricula, eliminarMatricula} = require('./models/matriculaModel.js');
 app.use(express.json())
 
 // Estudiante
@@ -69,11 +69,20 @@ app.post('/matricula', (req, res) => {
     if (!nuevaMatricula.cursos || !nuevaMatricula.modalidad || !nuevaMatricula.estado || !nuevaMatricula.idEstudiante) {
         return res.send("Faltan datos");
     } else {
-        añadirMatricula(nuevaMatricula, (err, result) => {
+        verificarMatricula(nuevaMatricula.idEstudiante, (err, existeMatricula) => {
             if (err) {
-                return res.send("Error al añadir la matrícula");
+                return res.send("Error al verificar la matrícula del estudiante");
+            }
+            if (existeMatricula) {
+                return res.send("El estudiante ya tiene una matrícula");
             } else {
-                return res.json({result});
+                añadirMatricula(nuevaMatricula, (err, result) => {
+                    if (err) {
+                        return res.send("Error al añadir la matrícula");
+                    } else {
+                        return res.json({result});
+                    }
+                });
             }
         });
     }
@@ -104,12 +113,12 @@ app.delete('/matricula/:id', (req, res) => {
     });
 });
 /* select count(id) from matricula */
-app.get('/matricula/count', (req, res) => {
+/* app.get('/matricula/count', (req, res) => {
     contarMatriculas((results) => {
     const count = results.length;
         res.json({count});
     });
-});
+}); */
 app.listen(PORT, () => {
     console.log("Servidor corriendo correctamente");
 })

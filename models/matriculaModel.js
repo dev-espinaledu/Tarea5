@@ -13,15 +13,27 @@ function añadirMatricula(nuevaMatricula, callback) {
     const query = "INSERT INTO matricula (cursos, modalidad, estado, idEstudiante) VALUES(?, ?, ?, ?)";
     db.query(query, [nuevaMatricula.cursos, nuevaMatricula.modalidad, nuevaMatricula.estado, nuevaMatricula.idEstudiante], (err, results) => {
         if (err) {
-            console.log("Error al añadir la matrícula");
+            console.log("Error al añadir la matrícula:", err);
+            callback(err, null);
         } else {
             db.query("SELECT * FROM matricula WHERE id_matricula=?", [results.insertId], (err, results) => {
                 if (err) {
-                    console.log("No se pudo obtener la matrícula añadida");
+                    console.log("No se pudo obtener la matrícula añadida:", err);
+                    callback(err, null);
                 } else {
-                    callback(results[0]);
+                    callback(null, results[0]);
                 }
             });
+        }
+    });
+}
+function verificarMatricula(idEstudiante, callback) {
+    db.query("SELECT * FROM matricula WHERE idEstudiante = ?", [idEstudiante], (err, results) => {
+        if (err) {
+            console.log("Error al verificar la matrícula del estudiante");
+            callback(err, null);
+        } else {
+            callback(null, results.length > 0);
         }
     });
 }
@@ -30,14 +42,12 @@ function actualizarMatricula(matriculaid, nuevosDatosMatricula, callback) {
     db.query(query, [nuevosDatosMatricula.cursos, nuevosDatosMatricula.modalidad, nuevosDatosMatricula.estado, nuevosDatosMatricula.idEstudiante, matriculaid], (err, results) => {
         if (err) {
             console.log("Actualización de matrícula no realizada", err);
-            callback(err);  // Enviar el error de vuelta al callback
         } else {
             db.query("SELECT * FROM matricula WHERE id_matricula = ?", [matriculaid], (err, results) => {
                 if (err) {
                     console.log("No se pudo obtener la matrícula actualizada", err);
-                    callback(err);
                 } else {
-                    callback(null, results[0]);
+                    callback(results[0]);
                 }
             });
         }
@@ -54,7 +64,7 @@ function eliminarMatricula(matriculaid, callback) {
     });
 }
 /* select count(id) from matricula */
-function contarMatriculas(callback) {
+/* function contarMatriculas(callback) {
     db.query("SELECT COUNT(id_matricula) as cantidad FROM matricula", (err, results) => {
         if (err) {
             console.log("Error al contar matrículas");
@@ -63,5 +73,5 @@ function contarMatriculas(callback) {
             callback(null, results[0].cantidad);
         }
     });
-}
-module.exports = {mostrarMatriculas, añadirMatricula, actualizarMatricula, eliminarMatricula, contarMatriculas}
+} */
+module.exports = {mostrarMatriculas, añadirMatricula, verificarMatricula, actualizarMatricula, eliminarMatricula}
